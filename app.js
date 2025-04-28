@@ -5,6 +5,8 @@ import createError from 'http-errors';
 import helmet from 'helmet';
 import cors from 'cors';
 import env from './config/env.js';
+import dotenv from "dotenv";
+dotenv.config();
 import pickupRoutes from './routes/pickupRoutes.js';
 
 const app = express();
@@ -16,6 +18,8 @@ app.use(helmet());
   CORS 설정은 왜 필요할까요?
 
  */
+// mongoose.populate 활용
+// https://mongoosejs.com/docs/populate.html
 app.use(cors({
   origin: env.CORS_ORIGIN || '*',
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
@@ -23,8 +27,8 @@ app.use(cors({
 }));
 
 mongoose.connect(env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
+  // useNewUrlParser: true,
+  // useUnifiedTopology: true
 })
 .then(() => console.log('MongoDB 연결 성공'))
 .catch(err => console.error('MongoDB 연결 실패:', err));
@@ -36,7 +40,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(`${env.API_PREFIX}/pickups`, pickupRoutes);
 
 app.use((req, res, next) => {
-  next(createError(404, '요청하신 리소스를 찾을 수 없습니다.'));
+  next(createError(404, '요청하신 리소스를 찾을 수 없습니다ㅋㅋ'));
 });
 
 app.use((err, req, res, next) => {

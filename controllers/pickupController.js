@@ -7,6 +7,10 @@ import {
 
 export const createPickupRequest = async (req, res, next) => {
   // TODO: 수거 요청 생성
+  const request = req.body;
+  const dbPickupCreate = await createPickup(request);
+  res.json(dbPickupCreate);
+
 };
 
 export const getPickupRequests = async (req, res, next) => {
