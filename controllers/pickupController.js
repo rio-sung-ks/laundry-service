@@ -7,13 +7,22 @@ import {
 
 export const createPickupRequest = async (req, res, next) => {
   // TODO: 수거 요청 생성
+  
   try {
     const request = req.body;
+    console.dir(request);
     const dbPickupCreate = await createPickup(request);
     res.json(dbPickupCreate);
 
   } catch (error) {
-    res.status(400).json({ message : '400 Bad Reqeust' })
+    res.status(error.statusCode).json({
+      message : "Reponse (400 Bad Request) : ",
+      error: {
+        code:  error.code,
+        message: error.message,
+        details: error.details
+      }
+    });
   }
 
 };
@@ -32,23 +41,3 @@ export const cancelPickupRequest = async (req, res, next) => {
 export const updatePickupRequest = async (req, res, next) => {
   // TODO: 수거 요청 수정
 };
-
-
-
-
-// import { createPickup } from '../services/pickupService.js';
-
-// export const createPickupRequest = async (req, res, next) => {
-//   try {
-//     const body = req.body;
-//     const createdPickup = await createPickup(body);
-//     res.status(201).json(createdPickup);
-//   } catch (error) {
-//     // ❗ 여기서 400 Bad Request로 응답
-//     res.status(400).json({
-//       error: {
-//         message: error.message || 'Bad Request',
-//       }
-//     });
-//   }
-// };
