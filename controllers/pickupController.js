@@ -10,11 +10,15 @@ export const createPickupRequest = async (req, res, next) => {
   const request = req.body;
   const dbPickupCreate = await createPickup(request);
   res.json(dbPickupCreate);
-
 };
 
 export const getPickupRequests = async (req, res, next) => {
   // TODO: 수거 요청 목록 조회
+  const request = req.query;
+  console.log(request);
+  const dbGetPickups = await getPickups(request);
+  res.json(dbGetPickups);
+
 };
 
 export const cancelPickupRequest = async (req, res, next) => {

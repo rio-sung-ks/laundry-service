@@ -11,6 +11,13 @@ export const createPickup = async (pickupData) => {
 
 export const getPickups = async (query) => {
   // TODO: 수거 요청 목록 조회
+  const {start, end} = query;
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  console.log(`start : ${startDate}`);
+  console.log(`end : ${endDate}`);
+  const dbGetPickups =  await Pickup.find({ createdAt: { $gte: startDate, $lte: endDate } });
+  return dbGetPickups;
 };
 
 export const cancelPickup = async (id) => {
