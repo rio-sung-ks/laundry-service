@@ -4,9 +4,14 @@ import redisClient from '../config/redis.js';
 
 export const createPickup = async (pickupData) => {
   // TODO: 수거 요청 생성
-  const pickupCreate =  new Pickup(pickupData);
-  const dbPickupCreate = await pickupCreate.save();
-  return dbPickupCreate;
+  try {
+    const pickupCreate =  new Pickup(pickupData);
+    const dbPickupCreate = await pickupCreate.save();
+    return dbPickupCreate;
+
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const getPickups = async (query) => {
@@ -14,8 +19,6 @@ export const getPickups = async (query) => {
   const {start, end} = query;
   const startDate = new Date(start);
   const endDate = new Date(end);
-  console.log(`start : ${startDate}`);
-  console.log(`end : ${endDate}`);
   const dbGetPickups =  await Pickup.find({ createdAt: { $gte: startDate, $lte: endDate } });
   return dbGetPickups;
 };
