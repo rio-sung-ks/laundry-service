@@ -1,4 +1,4 @@
-import { VALIDATION } from "../config/constants.js";
+import { MESSAGES, TIME, VALIDATION } from "../config/constants.js";
 
 export function checkFieldMissing(pickupData) {
   const requestField = [
@@ -43,7 +43,6 @@ export function checkNameLength(pickupData) {
 
 export function checkPhoneNumberFormat(pickupData) {
   const phoneNumber = pickupData["phoneNumber"];
-  console.log(phoneNumber);
   if (!VALIDATION.PHONE_NUMBER.PATTERN.test(phoneNumber)) {
     const error = new Error("올바른 전화번호 형식이 아닙니다");
     error.title = "Response (400 Bad Request): ";
@@ -58,22 +57,30 @@ export function checkPhoneNumberFormat(pickupData) {
   }
 }
 
-
-export async function createPickupInDB(pickupData){
-  try {
-    const pickupCreate = new Pickup(pickupData);
-    const dbPickupCreate = await pickupCreate.save();
-
-    return dbPickupCreate;
-  } catch (err) {
-
-    const error = new Error("데이터베이스 처리 중 오류가 발생했습니다");
-    error.title = "Response (500 Internal Server Error):";
-    error.code = "DATABASE_ERROR";
+export function checkDateFormat(startDate, endDate) {
+  if (isNaN(startDate.getDate()) || isNaN(endDate.getDate())) {
+    const error = new Error(MESSAGES.ERROR.INVALID_DATE);
+    error.title = "Response (400 Bad Request): ";
+    error.code = "INVALID_DATE_FORMAT";
     error.details = {
-      errorCode: "DB_CONNECTION_ERROR",
-      timestamp: new Date()
+      field: "end",
+      value: "invalid-date",
+      constraint: TIME.DATE_FORMAT,
     };
+    throw error;
+  }
+
+}
+
+export function checkDateRange(startDate, endDate) {
+  if (startDate > endDate) {
+    const error = new Error(MESSAGES.ERROR.INVALID_DATE_RANGE);
+    error.title = "Response (400 Bad Request): ";
+    error.code = "INVALID_DATE_RANGE"
+    error.details = {
+      start: startDate,
+      end : endDate
+    }
     throw error;
   }
 }

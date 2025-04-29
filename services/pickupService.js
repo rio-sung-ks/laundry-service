@@ -6,7 +6,8 @@ import {
   checkFieldMissing,
   checkNameLength,
   checkPhoneNumberFormat,
-  createPickupInDB,
+  checkDateFormat,
+  checkDateRange
 } from "./validationCheck.js";
 
 export const createPickup = async (pickupData) => {
@@ -29,47 +30,44 @@ export const createPickup = async (pickupData) => {
   checkPhoneNumberFormat(pickupData);
 
   // 4. exceed the number of request
+  // Redis
   // Response (429 Too Many Requests):
 
   // 5. internal server error
-  await createPickupInDB(pickupData);
-  // try {
-  //   const pickupCreate = new Pickup(pickupData);
-  //   const dbPickupCreate = await pickupCreate.save();
+  try {
+    const pickupCreate = new Pickup(pickupData);
+    const dbPickupCreate = await pickupCreate.save();
 
-  //   return dbPickupCreate;
-  // } catch (err) {
+    return dbPickupCreate;
+  } catch (err) {
 
-  //   const error = new Error("데이터베이스 처리 중 오류가 발생했습니다");
-  //   error.title = "Response (500 Internal Server Error):";
-  //   error.code = "DATABASE_ERROR";
-  //   error.details = {
-  //     errorCode: "DB_CONNECTION_ERROR",
-  //     timestamp: new Date()
-  //   };
-  //   throw error;
-  // }
+    const error = new Error("데이터베이스 처리 중 오류가 발생했습니다");
+    error.title = "Response (500 Internal Server Error):";
+    error.code = "DATABASE_ERROR";
+    error.details = {
+      errorCode: "DB_CONNECTION_ERROR",
+      timestamp: new Date()
+    };
+    throw error;
+  }
 };
 
 export const getPickups = async (query) => {
   // TODO: 수거 요청 목록 조회
   try {
     const { start, end } = query;
-    const startDate = new Date(start);
+    const startDate = new Date(start); // invalid Date 가 결과로 담김.
     const endDate = new Date(end);
+    checkDateFormat(startDate, endDate);
+    checkDateRange(startDate, endDate);
+
     const dbGetPickups = await Pickup.find({
       createdAt: { $gte: startDate, $lte: endDate },
     });
+
     return dbGetPickups;
-  } catch (err) {
-    const error = new Error(MESSAGES.ERROR.INVALID_DATE);
-    error.title = "Response (400 Bad Request): ";
-    error.code = "INVALID_DATE_FORMAT";
-    error.details = {
-      field: "end",
-      value: "invalid-date",
-      constraint: TIME.DATE_FORMAT,
-    };
+
+  } catch (error) {
     throw error;
   }
 };

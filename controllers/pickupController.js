@@ -2,8 +2,8 @@ import {
   createPickup,
   getPickups,
   cancelPickup,
-  updatePickup
-} from '../services/pickupService.js';
+  updatePickup,
+} from "../services/pickupService.js";
 
 export const createPickupRequest = async (req, res, next) => {
   // TODO: 수거 요청 생성
@@ -13,18 +13,20 @@ export const createPickupRequest = async (req, res, next) => {
     console.dir(request);
     const dbPickupCreate = await createPickup(request);
     res.json(dbPickupCreate);
-
   } catch (error) {
     next(error);
   }
-
 };
 
 export const getPickupRequests = async (req, res, next) => {
   // TODO: 수거 요청 목록 조회
-  const dbGetPickups = await getPickups(req.query);
-  res.json(dbGetPickups);
+  try {
+    const dbGetPickups = await getPickups(req.query);
+    res.json(dbGetPickups);
 
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const cancelPickupRequest = async (req, res, next) => {

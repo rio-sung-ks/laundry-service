@@ -51,7 +51,8 @@ app.use((err, req, res, next) => {
     error: {
       code: err.code,
       message: err.message,
-      details: env.NODE_ENV === 'development' ? err : undefined,
+      details: env.NODE_ENV === 'development' ? err.details : undefined,
+      test: "test"
     }
   });
 });
