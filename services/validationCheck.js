@@ -99,7 +99,6 @@ export function checkPageNumber(pageNumber) {
 }
 
 export function checkPageLimit(pageLimit) {
-  console.log(pageLimit);
   if (pageLimit > 100) {
     const error = new Error(MESSAGES.ERROR.INVALID_LIMIT);
     error.title = "Response (400 Bad Request): ";

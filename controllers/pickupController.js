@@ -11,8 +11,8 @@ export const createPickupRequest = async (req, res, next) => {
   try {
     const request = req.body;
     console.dir(request);
-    const dbPickupCreate = await createPickup(request);
-    res.json(dbPickupCreate);
+    const dbCreatePickup = await createPickup(request);
+    res.json(dbCreatePickup);
   } catch (error) {
     next(error);
   }

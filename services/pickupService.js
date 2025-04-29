@@ -1,7 +1,5 @@
-import { Types } from "mongoose";
 import Pickup from "../models/Pickup.js";
-import redisClient from "../config/redis.js";
-import { MESSAGES, TIME, VALIDATION } from "../config/constants.js";
+
 import {
   checkFieldMissing,
   checkNameLength,
@@ -10,8 +8,12 @@ import {
   checkDateRange,
   checkPageNumber,
   checkPageLimit
-  
+
 } from "./validationCheck.js";
+
+import {
+  checkNoRecordFound,
+} from "./dbDataCheck.js";
 
 export const createPickup = async (pickupData) => {
   // TODO: 수거 요청 생성
@@ -39,9 +41,9 @@ export const createPickup = async (pickupData) => {
   // 5. internal server error
   try {
     const pickupCreate = new Pickup(pickupData);
-    const dbPickupCreate = await pickupCreate.save();
+    const dbCreatePickup = await pickupCreate.save();
 
-    return dbPickupCreate;
+    return dbCreatePickup;
   } catch (err) {
 
     const error = new Error("데이터베이스 처리 중 오류가 발생했습니다");
@@ -57,12 +59,12 @@ export const createPickup = async (pickupData) => {
 
 export const getPickups = async (query) => {
   // TODO: 수거 요청 목록 조회
+  const { start, end, page, limit } = query;
+  const startDate = new Date(start); // invalid Date 가 결과로 담김.
+  const endDate = new Date(end);
+
   try {
-    const { start, end, page, limit } = query;
-    console.log(limit);
-    
-    const startDate = new Date(start); // invalid Date 가 결과로 담김.
-    const endDate = new Date(end);
+
     checkDateFormat(startDate, endDate);
     checkDateRange(startDate, endDate);
     checkPageNumber(page);
@@ -71,6 +73,9 @@ export const getPickups = async (query) => {
     const dbGetPickups = await Pickup.find({
       createdAt: { $gte: startDate, $lte: endDate },
     });
+
+    checkNoRecordFound(start, end, dbGetPickups);
+    console.log("dbGetPickups :",dbGetPickups);
 
     return dbGetPickups;
 
