@@ -2,18 +2,21 @@ import { Types } from 'mongoose';
 import Pickup from '../models/Pickup.js';
 import redisClient from '../config/redis.js';
 import { VALIDATION } from '../config/constants.js';
-import { checkFieldMissing, checkNameLength } from './validationCheck.js';
+import { checkFieldMissing, checkNameLength, checkPhoneNumberFormat } from './validationCheck.js';
 
 export const createPickup = async (pickupData) => {
   // TODO: 수거 요청 생성
   const requestField = ["customerName", "address", "phoneNumber", "requestDetails"];
   const customerName = pickupData["customerName"];
 
-  // 1. 필드누락
+  // 1. missing field
   checkFieldMissing(pickupData);
 
-  // 2. 이름 길이
+  // 2. name length
   checkNameLength(pickupData);
+
+  // 3. phoneNumber format
+  checkPhoneNumberFormat(pickupData)
 
   const pickupCreate =  new Pickup(pickupData);
   const dbPickupCreate = await pickupCreate.save();

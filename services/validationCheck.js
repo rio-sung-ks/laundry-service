@@ -30,3 +30,19 @@ export function checkNameLength(pickupData){
     throw error;
   }
 }
+
+export function checkPhoneNumberFormat(pickupData){
+  const phoneNumber = pickupData["phoneNumber"];
+  console.log(phoneNumber);
+  if (!VALIDATION.PHONE_NUMBER.PATTERN.test(phoneNumber)) {
+    const error = new Error("올바른 전화번호 형식이 아닙니다");
+    error.statusCode = 400;
+    error.code = "INVALID_PHONE_FORMAT";
+    error.details = {
+      field: "phoneNumber",
+      value: phoneNumber,
+      constraint: "format: XXX-XXXX-XXXX"
+    };
+    throw error;
+  }
+}
