@@ -15,14 +15,7 @@ export const createPickupRequest = async (req, res, next) => {
     res.json(dbPickupCreate);
 
   } catch (error) {
-    res.status(error.statusCode).json({
-      message :error.title,
-      error: {
-        code:  error.code,
-        message: error.message,
-        details: error.details
-      }
-    });
+    next(error);
   }
 
 };

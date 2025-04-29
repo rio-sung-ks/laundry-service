@@ -42,18 +42,16 @@ app.use(express.urlencoded({ extended: false }));
 app.use(`${env.API_PREFIX}/pickups`, pickupRoutes);
 
 app.use((req, res, next) => {
-  next(createError(404, '요청하신 리소스를 찾을 수 없습니다ㅋㅋ'));
+  next(createError(404, '요청하신 리소스를 찾을 수 없습니다 ❌'));
 });
 
 app.use((err, req, res, next) => {
-  console.error(err);
-
   let statusCode = err.status || 500;
-
   res.status(statusCode).json({
     error: {
+      code: err.code,
       message: err.message,
-      details: env.NODE_ENV === 'development' ? err : undefined
+      details: env.NODE_ENV === 'development' ? err : undefined,
     }
   });
 });

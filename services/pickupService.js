@@ -1,12 +1,22 @@
-import { Types } from 'mongoose';
-import Pickup from '../models/Pickup.js';
-import redisClient from '../config/redis.js';
-import { VALIDATION } from '../config/constants.js';
-import { checkFieldMissing, checkNameLength, checkPhoneNumberFormat } from './validationCheck.js';
+import { Types } from "mongoose";
+import Pickup from "../models/Pickup.js";
+import redisClient from "../config/redis.js";
+import { MESSAGES, TIME, VALIDATION } from "../config/constants.js";
+import {
+  checkFieldMissing,
+  checkNameLength,
+  checkPhoneNumberFormat,
+  createPickupInDB,
+} from "./validationCheck.js";
 
 export const createPickup = async (pickupData) => {
   // TODO: 수거 요청 생성
-  const requestField = ["customerName", "address", "phoneNumber", "requestDetails"];
+  const requestField = [
+    "customerName",
+    "address",
+    "phoneNumber",
+    "requestDetails",
+  ];
   const customerName = pickupData["customerName"];
 
   // 1. missing field
@@ -16,39 +26,52 @@ export const createPickup = async (pickupData) => {
   checkNameLength(pickupData);
 
   // 3. phoneNumber format
-  checkPhoneNumberFormat(pickupData)
+  checkPhoneNumberFormat(pickupData);
 
   // 4. exceed the number of request
   // Response (429 Too Many Requests):
 
   // 5. internal server error
+  await createPickupInDB(pickupData);
+  // try {
+  //   const pickupCreate = new Pickup(pickupData);
+  //   const dbPickupCreate = await pickupCreate.save();
 
-  try {
-    const pickupCreate =  new Pickup(pickupData);
-    const dbPickupCreate = await pickupCreate.save();
-    return dbPickupCreate;
+  //   return dbPickupCreate;
+  // } catch (err) {
 
-  } catch (err) {
-    const error = new Error("데이터베이스 처리 중 오류가 발생했습니다");
-    error.statusCode = 500;
-    error.title = "Response (500 Internal Server Error):";
-    error.code = "DATABASE_ERROR";
-    error.timestamp = new Date();
-    error.details = {
-      errorCode: "DB_CONNECTION_ERROR",
-      timestamp: error.timestamp
-    };
-    throw error;
-  }
+  //   const error = new Error("데이터베이스 처리 중 오류가 발생했습니다");
+  //   error.title = "Response (500 Internal Server Error):";
+  //   error.code = "DATABASE_ERROR";
+  //   error.details = {
+  //     errorCode: "DB_CONNECTION_ERROR",
+  //     timestamp: new Date()
+  //   };
+  //   throw error;
+  // }
 };
 
 export const getPickups = async (query) => {
   // TODO: 수거 요청 목록 조회
-  const {start, end} = query;
-  const startDate = new Date(start);
-  const endDate = new Date(end);
-  const dbGetPickups =  await Pickup.find({ createdAt: { $gte: startDate, $lte: endDate } });
-  return dbGetPickups;
+  try {
+    const { start, end } = query;
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const dbGetPickups = await Pickup.find({
+      createdAt: { $gte: startDate, $lte: endDate },
+    });
+    return dbGetPickups;
+  } catch (err) {
+    const error = new Error(MESSAGES.ERROR.INVALID_DATE);
+    error.title = "Response (400 Bad Request): ";
+    error.code = "INVALID_DATE_FORMAT";
+    error.details = {
+      field: "end",
+      value: "invalid-date",
+      constraint: TIME.DATE_FORMAT,
+    };
+    throw error;
+  }
 };
 
 export const cancelPickup = async (id) => {
