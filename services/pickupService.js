@@ -18,10 +18,28 @@ export const createPickup = async (pickupData) => {
   // 3. phoneNumber format
   checkPhoneNumberFormat(pickupData)
 
-  const pickupCreate =  new Pickup(pickupData);
-  const dbPickupCreate = await pickupCreate.save();
+  // 4. exceed the number of request
+  // Response (429 Too Many Requests):
 
-  return dbPickupCreate;
+  // 5. internal server error
+
+  try {
+    const pickupCreate =  new Pickup(pickupData);
+    const dbPickupCreate = await pickupCreate.save();
+    return dbPickupCreate;
+
+  } catch (err) {
+    const error = new Error("데이터베이스 처리 중 오류가 발생했습니다");
+    error.statusCode = 500;
+    error.title = "Response (500 Internal Server Error):";
+    error.code = "DATABASE_ERROR";
+    error.timestamp = new Date();
+    error.details = {
+      errorCode: "DB_CONNECTION_ERROR",
+      timestamp: error.timestamp
+    };
+    throw error;
+  }
 };
 
 export const getPickups = async (query) => {

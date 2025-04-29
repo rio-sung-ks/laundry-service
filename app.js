@@ -26,6 +26,8 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
+const conn = mongoose.createConnection(env.MONGODB_URI)
+
 mongoose.connect(env.MONGODB_URI, {
   // useNewUrlParser: true,
   // useUnifiedTopology: true

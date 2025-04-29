@@ -7,7 +7,7 @@ import {
 
 export const createPickupRequest = async (req, res, next) => {
   // TODO: 수거 요청 생성
-  
+
   try {
     const request = req.body;
     console.dir(request);
@@ -16,7 +16,7 @@ export const createPickupRequest = async (req, res, next) => {
 
   } catch (error) {
     res.status(error.statusCode).json({
-      message : "Reponse (400 Bad Request) : ",
+      message :error.title,
       error: {
         code:  error.code,
         message: error.message,

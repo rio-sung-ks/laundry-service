@@ -4,7 +4,8 @@ import { VALIDATION } from '../config/constants.js';
 const pickupSchema = new mongoose.Schema({
   // TODO: 수거 요청 스키마 정의
   customerName: {
-    type: String,
+    // type: String,
+    type: Number, // for 500 error test
     min: VALIDATION.CUSTOMER_NAME.MIN_LENGTH,
     max: VALIDATION.CUSTOMER_NAME.MAX_LENGTH,
     required: true
