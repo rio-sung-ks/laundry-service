@@ -16,7 +16,6 @@ import {
 } from "./dbDataCheck.js";
 
 export const createPickup = async (pickupData) => {
-  // TODO: 수거 요청 생성
   const requestField = [
     "customerName",
     "address",
@@ -25,20 +24,13 @@ export const createPickup = async (pickupData) => {
   ];
   const customerName = pickupData["customerName"];
 
-  // 1. missing field
   checkFieldMissing(pickupData);
-
-  // 2. name length
   checkNameLength(pickupData);
-
-  // 3. phoneNumber format
   checkPhoneNumberFormat(pickupData);
-
   // 4. exceed the number of request
   // Redis
   // Response (429 Too Many Requests):
 
-  // 5. internal server error
   try {
     const pickupCreate = new Pickup(pickupData);
     const dbCreatePickup = await pickupCreate.save();
@@ -58,7 +50,6 @@ export const createPickup = async (pickupData) => {
 };
 
 export const getPickups = async (query) => {
-  // TODO: 수거 요청 목록 조회
   const { start, end, page, limit } = query;
   const startDate = new Date(start); // invalid Date 가 결과로 담김.
   const endDate = new Date(end);
@@ -73,10 +64,9 @@ export const getPickups = async (query) => {
     const dbGetPickups = await Pickup.find({
       createdAt: { $gte: startDate, $lte: endDate },
     });
+    // 5. internal server error
 
     checkNoRecordFound(start, end, dbGetPickups);
-    console.log("dbGetPickups :",dbGetPickups);
-
     return dbGetPickups;
 
   } catch (error) {
@@ -85,7 +75,11 @@ export const getPickups = async (query) => {
 };
 
 export const cancelPickup = async (id) => {
-  // TODO: 수거 요청 취소
+  const dbCancelPickup =  await Pickup.findOneAndDelete({ _id:id })
+  if (dbCancelPickup) {
+
+    return dbCancelPickup;
+  }
 };
 
 export const updatePickup = async (id, updateData) => {

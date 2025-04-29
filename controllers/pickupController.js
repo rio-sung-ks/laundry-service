@@ -1,3 +1,4 @@
+import { PICKUP_STATUS } from "../config/constants.js";
 import {
   createPickup,
   getPickups,
@@ -10,7 +11,6 @@ export const createPickupRequest = async (req, res, next) => {
 
   try {
     const request = req.body;
-    console.dir(request);
     const dbCreatePickup = await createPickup(request);
     res.json(dbCreatePickup);
   } catch (error) {
@@ -23,7 +23,6 @@ export const getPickupRequests = async (req, res, next) => {
   try {
     const dbGetPickups = await getPickups(req.query);
     res.json(dbGetPickups);
-
   } catch (error) {
     next(error);
   }
@@ -31,6 +30,14 @@ export const getPickupRequests = async (req, res, next) => {
 
 export const cancelPickupRequest = async (req, res, next) => {
   // TODO: 수거 요청 취소
+  const id = req.params.id;
+  const dbCancelPickup = await cancelPickup(id);
+  res.json({
+    title : "Response (200 OK): ",
+    id: dbCancelPickup._id,
+    status: PICKUP_STATUS.CANCELLED,
+    cancelledAt: new Date(),
+  });
 };
 
 export const updatePickupRequest = async (req, res, next) => {
