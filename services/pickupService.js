@@ -7,7 +7,8 @@ import {
   checkNameLength,
   checkPhoneNumberFormat,
   checkDateFormat,
-  checkDateRange
+  checkDateRange,
+  checkPageNumber
 } from "./validationCheck.js";
 
 export const createPickup = async (pickupData) => {
@@ -55,11 +56,12 @@ export const createPickup = async (pickupData) => {
 export const getPickups = async (query) => {
   // TODO: 수거 요청 목록 조회
   try {
-    const { start, end } = query;
+    const { start, end, page } = query;
     const startDate = new Date(start); // invalid Date 가 결과로 담김.
     const endDate = new Date(end);
     checkDateFormat(startDate, endDate);
     checkDateRange(startDate, endDate);
+    checkPageNumber(page);
 
     const dbGetPickups = await Pickup.find({
       createdAt: { $gte: startDate, $lte: endDate },

@@ -69,18 +69,31 @@ export function checkDateFormat(startDate, endDate) {
     };
     throw error;
   }
-
 }
 
 export function checkDateRange(startDate, endDate) {
   if (startDate > endDate) {
     const error = new Error(MESSAGES.ERROR.INVALID_DATE_RANGE);
     error.title = "Response (400 Bad Request): ";
-    error.code = "INVALID_DATE_RANGE"
+    error.code = "INVALID_DATE_RANGE";
     error.details = {
       start: startDate,
-      end : endDate
-    }
+      end: endDate,
+    };
+    throw error;
+  }
+}
+
+export function checkPageNumber(pageNumber) {
+  if (pageNumber <= 1) {
+    const error = new Error(MESSAGES.ERROR.INVALID_PAGE);
+    error.title = "Response (400 Bad Request): ";
+    error.code = "INVALID_PAGE_NUMBER";
+    error.details = {
+      field: "page",
+      value: pageNumber,
+      constraint: "min: 1",
+    };
     throw error;
   }
 }
