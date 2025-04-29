@@ -97,3 +97,18 @@ export function checkPageNumber(pageNumber) {
     throw error;
   }
 }
+
+export function checkPageLimit(pageLimit) {
+  console.log(pageLimit);
+  if (pageLimit > 100) {
+    const error = new Error(MESSAGES.ERROR.INVALID_LIMIT);
+    error.title = "Response (400 Bad Request): ";
+    error.code = "INVALID_LIMIT";
+    error.details = {
+      field: "limit",
+      value: 150,
+      constraint: "max: 100",
+    };
+    throw error;
+  }
+}
