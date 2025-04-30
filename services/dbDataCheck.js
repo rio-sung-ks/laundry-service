@@ -1,9 +1,7 @@
 import { MESSAGES, TIME, VALIDATION } from "../config/constants.js";
 
 export function checkNoRecordFound(start, end, dbGetPickups) {
-
-  if(dbGetPickups.length === 0){
-
+  if (dbGetPickups.length === 0) {
     const error = new Error("해당 기간의 수거 요청이 존재하지 않습니다.");
     error.title = "Response (404 Not Found): ";
     error.code = "NO_RECORDS_FOUND";
@@ -15,20 +13,48 @@ export function checkNoRecordFound(start, end, dbGetPickups) {
   }
 }
 
-export function checkCancelTimeExpired(dbCancelResult, nowTime, timeElapsed){
-
+export function checkTimeCancellable(dbCancelPickup) {
+  const now = new Date();
+  const nowTime = now.getTime();
+  const createTime = dbCancelPickup.createdAt.getTime();
+  const timeElapsed = nowTime - createTime;
   const hourElapsed = timeElapsed / (60 * 60 * 1000);
   const hourElapsedFloor = Math.floor(timeElapsed / (60 * 60 * 1000));
-  const minElapsedFloor = Math.floor((hourElapsed - hourElapsedFloor) * 60);
-  if (dbCancelResult) {
+  const minElapsedFloor = Math.floor((hourElapsed - hourElapsedFloor) * 60)
+  const isCancellable = timeElapsed <= TIME.CANCELLATION_WINDOW;
+
+  console.log(`isCancellable : ${isCancellable}`);
+  console.log(`createTime : ${createTime}`);
+  console.log(`timeElapsed : ${timeElapsed}`);
+  console.log(`hourElapsed : ${hourElapsed}`);
+  console.log(`hourElapsedFloor : ${hourElapsedFloor}`);
+  console.log(`minElapsedFloor : ${minElapsedFloor}`);
+  if (!isCancellable) {
+    console.log(` 취소가능 시간 경과 `);
     const error = new Error("취소 가능 시간(1시간)이 경과했습니다");
     error.title = "Response (400 Bad Request) : ";
     error.code = "CANCELLATION_TIME_EXPIRED";
     error.details = {
-      createdAt: dbCancelResult.createdAt,
+      createdAt: dbCancelPickup.createdAt,
       curretTime: new Date(nowTime),
-      timeElapsed: `${hourElapsedFloor} 시간 ${minElapsedFloor} 분`
+      timeElapsed: `${hourElapsedFloor} 시간 ${minElapsedFloor} 분`,
     };
+
+    throw error;
+  }
+}
+
+export function checkStatusCancellable(dbCancelPickup) {
+  const isStatusCancellable = dbCancelPickup.status !== "CANCELLED";
+  if (!isStatusCancellable) {
+    const error = new Error("이미 취소된 요청입니다");
+    error.title = "Response (400 Bad Request) : ";
+    error.code = "ALREADY_CANCELLED";
+    error.details = {
+      status: dbCancelPickup.status,
+      cancelledAt: dbCancelPickup.updatedAt,
+    };
+
     throw error;
   }
 }

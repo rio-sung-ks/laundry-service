@@ -9,8 +9,8 @@ import {
   checkPageNumber,
   checkPageLimit,
 } from "./validationCheck.js";
-
-import { checkNoRecordFound, checkCancelTimeExpired } from "./dbDataCheck.js";
+``
+import { checkNoRecordFound, checkTimeCancellable, checkStatusCancellable } from "./dbDataCheck.js";
 import { TIME } from "../config/constants.js";
 
 export const createPickup = async (pickupData) => {
@@ -72,40 +72,22 @@ export const getPickups = async (query) => {
   }
 };
 
-
 export const cancelPickup = async (id) => {
 
   const dbCancelPickup = await Pickup.findById({ _id:id });
-  if (!dbCancelPickup) {
-    // 해당 아이디 없음
-    // throw proper error
-    console.log("해당 아이디 없음");
-  }
-  // 아이디 있으면
-  console.log("해당 아이디 있음");
-  const now = new Date();
-  const nowTime = now.getTime();
-  const createTime = dbCancelPickup.createdAt.getTime();
+  try {
+    if (!dbCancelPickup) { // 해당 아이디 없음
+      console.log("해당 아이디 없음");
+    }
+    checkStatusCancellable(dbCancelPickup);
+    checkTimeCancellable(dbCancelPickup);
 
-  // 취소 한시간 경과했는지 확인
-  const timeElapsed = nowTime - createTime;
-  const hourElapsed = timeElapsed / (60 * 60 * 1000);
-  const hourElapsedFloor = Math.floor(timeElapsed / (60 * 60 * 1000));
-  const minElapsedFloor = Math.floor((hourElapsed - hourElapsedFloor) * 60);
-  const isCancellable = timeElapsed <= TIME.CANCELLATION_WINDOW;
-  console.log("isCancellable : ", isCancellable);
-
-  if(isCancellable){
-    // cancellable 하면
     const dbCancelResult = await Pickup.findOneAndUpdate({ _id:id }, { status: 'CANCELLED' });
     return dbCancelResult;
-  } else {
 
-    // isCanccellable = false
-    console.log("false 진입");
-    console.log("timeElapsed : ",timeElapsed);
-
-    checkCancelTimeExpired(dbCancelPickup, nowTime, timeElapsed)
+  } catch (error) {
+    console.log("error catch");
+    throw error;
   }
 };
 
