@@ -89,7 +89,6 @@ export const cancelPickup = async (id) => {
 
   // 취소 한시간 경과했는지 확인
   const timeElapsed = nowTime - createTime;
-  // const hourElapsed = Math.floor(timeElapsed/(60 * 60 * 1000));
   const hourElapsed = timeElapsed / (60 * 60 * 1000);
   const hourElapsedFloor = Math.floor(timeElapsed / (60 * 60 * 1000));
   const minElapsedFloor = Math.floor((hourElapsed - hourElapsedFloor) * 60);
@@ -98,7 +97,7 @@ export const cancelPickup = async (id) => {
 
   if(isCancellable){
     // cancellable 하면
-    const dbCancelResult = await Pickup.findByIdAndDelete(id);
+    const dbCancelResult = await Pickup.findOneAndUpdate({ _id:id }, { status: 'CANCELLED' });
     return dbCancelResult;
   } else {
 

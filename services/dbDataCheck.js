@@ -17,12 +17,9 @@ export function checkNoRecordFound(start, end, dbGetPickups) {
 
 export function checkCancelTimeExpired(dbCancelResult, nowTime, timeElapsed){
 
-  console.log("timeElapsed in dbcheck : ", timeElapsed);
   const hourElapsed = timeElapsed / (60 * 60 * 1000);
   const hourElapsedFloor = Math.floor(timeElapsed / (60 * 60 * 1000));
   const minElapsedFloor = Math.floor((hourElapsed - hourElapsedFloor) * 60);
-  console.log(`hourElapsedFloor : ${hourElapsedFloor}`);
-  console.log(`minElapsedFloor : ${minElapsedFloor}`);
   if (dbCancelResult) {
     const error = new Error("취소 가능 시간(1시간)이 경과했습니다");
     error.title = "Response (400 Bad Request) : ";
