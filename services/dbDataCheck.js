@@ -23,14 +23,7 @@ export function checkTimeCancellable(dbCancelPickup) {
   const minElapsedFloor = Math.floor((hourElapsed - hourElapsedFloor) * 60)
   const isCancellable = timeElapsed <= TIME.CANCELLATION_WINDOW;
 
-  console.log(`isCancellable : ${isCancellable}`);
-  console.log(`createTime : ${createTime}`);
-  console.log(`timeElapsed : ${timeElapsed}`);
-  console.log(`hourElapsed : ${hourElapsed}`);
-  console.log(`hourElapsedFloor : ${hourElapsedFloor}`);
-  console.log(`minElapsedFloor : ${minElapsedFloor}`);
   if (!isCancellable) {
-    console.log(` 취소가능 시간 경과 `);
     const error = new Error("취소 가능 시간(1시간)이 경과했습니다");
     error.title = "Response (400 Bad Request) : ";
     error.code = "CANCELLATION_TIME_EXPIRED";
@@ -53,6 +46,18 @@ export function checkStatusCancellable(dbCancelPickup) {
     error.details = {
       status: dbCancelPickup.status,
       cancelledAt: dbCancelPickup.updatedAt,
+    };
+
+    throw error;
+  }
+}
+export function checkNonExistentId(dbCancelPickup) {
+  if (!dbCancelPickup) {
+    const error = new Error("해당 수거 요청을 찾을 수 없습니다");
+    error.title = "Response (400 Bad Request) : ";
+    error.code = "PICKUP_NOT_FOUND";
+    error.details = {
+      requestId: "nonexistent_id",
     };
 
     throw error;

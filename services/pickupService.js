@@ -10,7 +10,12 @@ import {
   checkPageLimit,
 } from "./validationCheck.js";
 ``
-import { checkNoRecordFound, checkTimeCancellable, checkStatusCancellable } from "./dbDataCheck.js";
+import {
+  checkNoRecordFound,
+  checkTimeCancellable,
+  checkStatusCancellable,
+  checkNonExistentId,
+} from "./dbDataCheck.js";
 import { TIME } from "../config/constants.js";
 
 export const createPickup = async (pickupData) => {
@@ -76,9 +81,7 @@ export const cancelPickup = async (id) => {
 
   const dbCancelPickup = await Pickup.findById({ _id:id });
   try {
-    if (!dbCancelPickup) { // 해당 아이디 없음
-      console.log("해당 아이디 없음");
-    }
+    checkNonExistentId(dbCancelPickup);
     checkStatusCancellable(dbCancelPickup);
     checkTimeCancellable(dbCancelPickup);
 

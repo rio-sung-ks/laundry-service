@@ -32,6 +32,8 @@ export const cancelPickupRequest = async (req, res, next) => {
   // TODO: 수거 요청 취소
   try {
     const id = req.params.id;
+    console.log("🟢 id : ",id);
+    console.log("🟢 typeof id : ",typeof id);
     const dbCancelPickup = await cancelPickup(id);
     res.json({
       title : "Response (200 OK): ",
