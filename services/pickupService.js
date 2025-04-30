@@ -85,14 +85,9 @@ export const getPickups = async (query) => {
       page: parseInt(page),
       limit: parseInt(limit),
       totalPages: Math.ceil(docsTotal / limit),
-    }
+    };
 
-    console.log(pagination);
-
-    return {
-      dbGetPickups,
-      pagination
-    }
+    return { dbGetPickups, pagination };
   } catch (error) {
     throw error;
   }
