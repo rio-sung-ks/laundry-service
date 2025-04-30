@@ -82,9 +82,9 @@ export const getPickups = async (query) => {
     checkNoRecordFound(start, end, dbGetPickups);
     const pagination = {
       total: docsTotal,
-      page: page,
-      limit: limit,
-      totalPages: Math.floor(docsTotal / limit),
+      page: parseInt(page),
+      limit: parseInt(limit),
+      totalPages: Math.ceil(docsTotal / limit),
     }
 
     console.log(pagination);

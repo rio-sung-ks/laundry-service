@@ -1,4 +1,4 @@
-import { PICKUP_STATUS } from "../config/constants.js";
+import { PICKUP_STATUS, PAGINATION } from "../config/constants.js";
 import {
   createPickup,
   getPickups,
@@ -22,9 +22,14 @@ export const getPickupRequests = async (req, res, next) => {
   // TODO: 수거 요청 목록 조회
   try {
     const responseResult = await getPickups(req.query);
+    const { total, page = PAGINATION.DEFAULT_PAGE, limit = PAGINATION.DEFAULT_LIMIT, totalPages } = responseResult.pagination;
+
     res.json({
        pickups: responseResult.dbGetPickups,
-       pagination: responseResult.pagination,
+       total,
+       page,
+       limit,
+       totalPages,
     });
   } catch (error) {
     next(error);
@@ -61,3 +66,20 @@ export const updatePickupRequest = async (req, res, next) => {
   // TODO: 수거 요청 수정
 };
 
+// export const getPickupRequests = async (req, res, next) => {
+//   try {
+//     const responseResult = await getPickups(req.query);
+//     const { dbGetPickups, pagination } = responseResult;
+//     const { total, page, limit, totalPages } = pagination;
+
+//     res.json({
+//       pickups: dbGetPickups,
+//       total,
+//       page: parseInt(page),
+//       limit: parseInt(limit),
+//       totalPages,
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
