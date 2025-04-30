@@ -30,14 +30,18 @@ export const getPickupRequests = async (req, res, next) => {
 
 export const cancelPickupRequest = async (req, res, next) => {
   // TODO: 수거 요청 취소
-  const id = req.params.id;
-  const dbCancelPickup = await cancelPickup(id);
-  res.json({
-    title : "Response (200 OK): ",
-    id: dbCancelPickup._id,
-    status: PICKUP_STATUS.CANCELLED,
-    cancelledAt: new Date(),
-  });
+  try {
+    const id = req.params.id;
+    const dbCancelPickup = await cancelPickup(id);
+    res.json({
+      title : "Response (200 OK): ",
+      id: dbCancelPickup._id,
+      status: PICKUP_STATUS.CANCELLED,
+      cancelledAt: new Date(),
+    });
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const updatePickupRequest = async (req, res, next) => {
