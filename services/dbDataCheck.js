@@ -64,3 +64,19 @@ export function checkNonExistentId(dbCancelPickup) {
     throw error;
   }
 }
+
+export function checkProccessingRequest(dbCancelPickup) {
+  if (dbCancelPickup.status === "PROCESSING") {
+    const error = new Error("이미 처리 중인 요청입니다");
+    error.status = 409;
+    error.title = "Response (409 Bad Request) : ";
+    error.code = "REQUEST_IN_PROCESS";
+    error.details = {
+      status: "PROCESSING",
+      startedAt: dbCancelPickup.updatedAt,
+    };
+
+    throw error;
+  }
+}
+

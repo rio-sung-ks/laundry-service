@@ -10,6 +10,7 @@ const pickupSchema = new mongoose.Schema(
       min: VALIDATION.CUSTOMER_NAME.MIN_LENGTH,
       max: VALIDATION.CUSTOMER_NAME.MAX_LENGTH,
       required: true,
+      immutable: true,
     },
     address: {
       type: String,

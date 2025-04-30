@@ -48,6 +48,7 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
   let statusCode = err.status || 500;
   res.status(statusCode).json({
+    title: err.title,
     error: {
       code: err.code,
       message: err.message,

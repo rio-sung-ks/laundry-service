@@ -15,8 +15,8 @@ import {
   checkTimeCancellable,
   checkStatusCancellable,
   checkNonExistentId,
+  checkProccessingRequest,
 } from "./dbDataCheck.js";
-import { TIME } from "../config/constants.js";
 
 export const createPickup = async (pickupData) => {
   const requestField = [
@@ -96,6 +96,7 @@ export const getPickups = async (query) => {
 export const cancelPickup = async (id) => {
   const dbCancelPickup = await Pickup.findById({ _id: id });
   try {
+    checkProccessingRequest(dbCancelPickup);
     checkNonExistentId(dbCancelPickup);
     checkStatusCancellable(dbCancelPickup);
     checkTimeCancellable(dbCancelPickup);
@@ -103,7 +104,8 @@ export const cancelPickup = async (id) => {
 
     const dbCancelResult = await Pickup.findOneAndUpdate(
       { _id: id },
-      { status: "CANCELLED" }
+      { status: "CANCELLED" },
+      { new: true },
     );
     return dbCancelResult;
   } catch (error) {
@@ -113,5 +115,40 @@ export const cancelPickup = async (id) => {
 };
 
 export const updatePickup = async (id, updateData) => {
-  // TODO: 수거 요청 수정
+  // [PATCH]
+  // 3. 필수 항목 누락 - updateData 가 비어있는지 확인한다
+  // 4. 취소된 요청 - status === "CANCELLED"
+  // 5. 처리 중인 요청 - status === "PROCESSING"
+  // 6. 서버 내부 오류 - ????
+
+  // 1. 수정 불가능한 필드 포함 -
+  // 수정이 불가능한 필드를 배열로 만든다
+  try {
+    const immutableField = ["immutableField1", "immutableField2", "customerName", "immutableField3"] ;
+    for (const field in updateData) {
+      if (immutableField.indexOf(field) !== -1) {
+        console.log(immutableField.indexOf(field));
+        throw error;
+      }
+    }
+
+    // 0. Success 코드
+    const dbUpdatePickup = await Pickup.findOneAndUpdate( //null
+      { _id: id },
+      { requestDetails: updateData.requestDetails, status: "UPDATED" },
+      { new: true },
+    );
+
+
+    // 2. 필수 항목 길이 - requestDetails => updateData 의 validation 으로 길이를 확인한다
+    // console.log(updateData.requestDetails.length());
+
+    return dbUpdatePickup;
+
+  } catch (error) {
+     throw error;
+  }
+  // id로 Pickup 데이터에 조회한다
+
+
 };

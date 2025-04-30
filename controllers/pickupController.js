@@ -22,14 +22,19 @@ export const getPickupRequests = async (req, res, next) => {
   // TODO: 수거 요청 목록 조회
   try {
     const responseResult = await getPickups(req.query);
-    const { total, page = PAGINATION.DEFAULT_PAGE, limit = PAGINATION.DEFAULT_LIMIT, totalPages } = responseResult.pagination;
+    const {
+      total,
+      page = PAGINATION.DEFAULT_PAGE,
+      limit = PAGINATION.DEFAULT_LIMIT,
+      totalPages,
+    } = responseResult.pagination;
 
     res.json({
-       pickups: responseResult.dbGetPickups,
-       total,
-       page,
-       limit,
-       totalPages,
+      pickups: responseResult.dbGetPickups,
+      total,
+      page,
+      limit,
+      totalPages,
     });
   } catch (error) {
     next(error);
@@ -52,7 +57,7 @@ export const cancelPickupRequest = async (req, res, next) => {
     }
     const dbCancelPickup = await cancelPickup(id);
     res.json({
-      title : "Response (200 OK): ",
+      title: "Response (200 OK): ",
       id: dbCancelPickup._id,
       status: PICKUP_STATUS.CANCELLED,
       cancelledAt: new Date(),
@@ -63,23 +68,16 @@ export const cancelPickupRequest = async (req, res, next) => {
 };
 
 export const updatePickupRequest = async (req, res, next) => {
-  // TODO: 수거 요청 수정
+  const id = req.params.id;
+  const updateData = req.body;
+  const dbUpdatePickupResult = await updatePickup(id, updateData);
+  res.json({
+    id: dbUpdatePickupResult._id,
+    customerName: dbUpdatePickupResult.customerName,
+    address: dbUpdatePickupResult.address,
+    phoneNumber: dbUpdatePickupResult.phoneNumber,
+    requestDetails: dbUpdatePickupResult.requestDetails,
+    status: dbUpdatePickupResult.status,
+    updatedAt: dbUpdatePickupResult.updatedAt,
+  });
 };
-
-// export const getPickupRequests = async (req, res, next) => {
-//   try {
-//     const responseResult = await getPickups(req.query);
-//     const { dbGetPickups, pagination } = responseResult;
-//     const { total, page, limit, totalPages } = pagination;
-
-//     res.json({
-//       pickups: dbGetPickups,
-//       total,
-//       page: parseInt(page),
-//       limit: parseInt(limit),
-//       totalPages,
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
