@@ -20,7 +20,7 @@ export function checkTimeCancellable(dbCancelPickup) {
   const timeElapsed = nowTime - createTime;
   const hourElapsed = timeElapsed / (60 * 60 * 1000);
   const hourElapsedFloor = Math.floor(timeElapsed / (60 * 60 * 1000));
-  const minElapsedFloor = Math.floor((hourElapsed - hourElapsedFloor) * 60)
+  const minElapsedFloor = Math.floor((hourElapsed - hourElapsedFloor) * 60);
   const isCancellable = timeElapsed <= TIME.CANCELLATION_WINDOW;
 
   if (!isCancellable) {
@@ -51,6 +51,7 @@ export function checkStatusCancellable(dbCancelPickup) {
     throw error;
   }
 }
+
 export function checkNonExistentId(dbCancelPickup) {
   if (!dbCancelPickup) {
     const error = new Error("해당 수거 요청을 찾을 수 없습니다");

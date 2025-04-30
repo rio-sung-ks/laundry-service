@@ -85,7 +85,7 @@ export function checkDateRange(startDate, endDate) {
 }
 
 export function checkPageNumber(pageNumber) {
-  if (pageNumber <= 1) {
+  if (pageNumber < 1) {
     const error = new Error(MESSAGES.ERROR.INVALID_PAGE);
     error.title = "Response (400 Bad Request): ";
     error.code = "INVALID_PAGE_NUMBER";
