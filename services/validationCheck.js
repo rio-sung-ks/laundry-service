@@ -56,7 +56,6 @@ export function checkPhoneNumberFormat(pickupData) {
     throw error;
   }
 }
-
 export function checkDateFormat(startDate, endDate) {
   if (isNaN(startDate.getDate()) || isNaN(endDate.getDate())) {
     const error = new Error(MESSAGES.ERROR.INVALID_DATE);
@@ -70,7 +69,6 @@ export function checkDateFormat(startDate, endDate) {
     throw error;
   }
 }
-
 export function checkDateRange(startDate, endDate) {
   if (startDate > endDate) {
     const error = new Error(MESSAGES.ERROR.INVALID_DATE_RANGE);
@@ -83,7 +81,6 @@ export function checkDateRange(startDate, endDate) {
     throw error;
   }
 }
-
 export function checkPageNumber(pageNumber) {
   if (pageNumber < 1) {
     const error = new Error(MESSAGES.ERROR.INVALID_PAGE);
@@ -97,7 +94,6 @@ export function checkPageNumber(pageNumber) {
     throw error;
   }
 }
-
 export function checkPageLimit(pageLimit) {
   if (pageLimit > 100) {
     const error = new Error(MESSAGES.ERROR.INVALID_LIMIT);

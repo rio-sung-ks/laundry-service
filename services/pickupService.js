@@ -1,4 +1,9 @@
 import Pickup from "../models/Pickup.js";
+import mongoose from "mongoose";
+import env from "../config/env.js";
+import dotenv from "dotenv";
+dotenv.config();
+import { startSession } from "mongoose";
 
 import {
   checkFieldMissing,
@@ -9,7 +14,7 @@ import {
   checkPageNumber,
   checkPageLimit,
 } from "./validationCheck.js";
-``;
+
 import {
   checkNoRecordFound,
   checkTimeCancellable,
@@ -21,6 +26,8 @@ import {
   checkRequestLength,
   checkAlreadyCancelledInModifying,
   checkProccessingInModifying,
+  makeTransactionError,
+  checkIdLength,
 } from "./dbDataCheck.js";
 
 export const createPickup = async (pickupData) => {
@@ -40,6 +47,7 @@ export const createPickup = async (pickupData) => {
   // Response (429 Too Many Requests):
 
   try {
+    await mongoose.connect(env.MONGODB_URI);
     const pickupCreate = new Pickup(pickupData);
     const dbCreatePickup = await pickupCreate.save();
     return {
@@ -76,6 +84,7 @@ export const getPickups = async (query) => {
     checkPageNumber(page);
     checkPageLimit(limit);
 
+    await mongoose.connect(env.MONGODB_URI);
     const dbGetPickups = await Pickup.find({
       createdAt: { $gte: startDate, $lte: endDate },
     });
@@ -99,19 +108,19 @@ export const getPickups = async (query) => {
 };
 
 export const cancelPickup = async (id) => {
+  await mongoose.connect(env.MONGODB_URI);
   const dbCancelPickup = await Pickup.findById({ _id: id });
   try {
     checkProccessingRequest(dbCancelPickup);
     checkNonExistentId(dbCancelPickup);
     checkStatusCancellable(dbCancelPickup);
     checkTimeCancellable(dbCancelPickup);
-    // checkInvalidRequest(dbCancelPickup);
-
     const dbCancelResult = await Pickup.findOneAndUpdate(
       { _id: id },
       { status: "CANCELLED" },
-      { new: true },
+      { new: true }
     );
+
     return dbCancelResult;
   } catch (error) {
     console.log("error catch");
@@ -120,42 +129,40 @@ export const cancelPickup = async (id) => {
 };
 
 export const updatePickup = async (id, updateData) => {
+  const conn = await mongoose.connect(env.MONGODB_URI);
+  const session = await conn.startSession();
 
-  const foundPickup = await Pickup.findById({ _id: id });
-  const currentStatus = foundPickup.status;
-  console.log(foundPickup);
-  console.log("currentStatus : ", currentStatus);
-;;  // [PATCH]
-  // 3. 필수 항목 누락 - updateData 가 비어있는지 확인한다
-  // 4. 취소된 요청 - status === "CANCELLED"
-  // 5. 처리 중인 요청 - status === "PROCESSING"
-  // 6. 서버 내부 오류 - ????
-
-  // 1. 수정 불가능한 필드 포함 -
-  // 수정이 불가능한 필드를 배열로 만든다
   try {
+    session.startTransaction();
+    checkIdLength(id);
+    const foundPickup = await Pickup.findById({ _id: id });
     checkInvalidField(updateData);
     checkRequiredField(updateData);
     checkRequestLength(updateData);
     checkAlreadyCancelledInModifying(foundPickup);
     checkProccessingInModifying(foundPickup);
 
-
     const dbUpdatePickup = await Pickup.findOneAndUpdate(
       { _id: id },
       { requestDetails: updateData.requestDetails, status: "UPDATED" },
-      { new: true },
+      { new: true }
     );
 
-    // 2. 필수 항목 길이 - requestDetails => updateData 의 validation 으로 길이를 확인한다
-    // console.log(updateData.requestDetails.length());
+    // makeTransactionError(); // transaction error 가정
+    await session.commitTransaction();
 
     return dbUpdatePickup;
-
   } catch (error) {
-     throw error;
+    if(!error.isValid){
+      console.log("🟢 Validation Error");
+      throw error;
+    }
+    await session.abortTransaction();
+    console.log("🟢 Transaction Error");
+
+    throw error;
   }
-  // id로 Pickup 데이터에 조회한다
-
-
+  finally {
+    session.endSession();
+  }
 };
