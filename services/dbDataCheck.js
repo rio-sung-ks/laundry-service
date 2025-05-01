@@ -99,3 +99,23 @@ export function checkInvalidField(updateData) {
     };
 
 }
+
+export function checkRequiredField(updateData) {
+
+  const requiredField = ["customerName"] ;
+    for (const field in updateData) {
+      if (requiredField.indexOf(field) === -1) {
+        const error = new Error("요청사항 필드는 필수입니다.");
+        error.status = 400;
+        error.title = "Response (400 Bad Request) : ";
+        error.code = "MISSING_REQUEST_DETAILS";
+        error.details = {
+          field: "requestDetails",
+          constraint: "required"
+        };
+
+        throw error;
+      }
+    };
+
+}

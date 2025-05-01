@@ -17,6 +17,7 @@ import {
   checkNonExistentId,
   checkProccessingRequest,
   checkInvalidField,
+  checkRequiredField,
 } from "./dbDataCheck.js";
 
 export const createPickup = async (pickupData) => {
@@ -125,7 +126,8 @@ export const updatePickup = async (id, updateData) => {
   // 1. 수정 불가능한 필드 포함 -
   // 수정이 불가능한 필드를 배열로 만든다
   try {
-    checkInvalidField(updateData)
+    checkInvalidField(updateData);
+    checkRequiredField(updateData);
 
     // 0. Success 코드
     const dbUpdatePickup = await Pickup.findOneAndUpdate( //null
