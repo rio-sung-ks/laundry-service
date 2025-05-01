@@ -18,6 +18,7 @@ import {
   checkProccessingRequest,
   checkInvalidField,
   checkRequiredField,
+  checkRequestLength,
 } from "./dbDataCheck.js";
 
 export const createPickup = async (pickupData) => {
@@ -128,6 +129,7 @@ export const updatePickup = async (id, updateData) => {
   try {
     checkInvalidField(updateData);
     checkRequiredField(updateData);
+    checkRequestLength(updateData);
 
     // 0. Success 코드
     const dbUpdatePickup = await Pickup.findOneAndUpdate( //null
