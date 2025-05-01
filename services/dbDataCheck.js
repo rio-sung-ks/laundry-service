@@ -137,3 +137,17 @@ export function checkRequestLength(updateData) {
     }
 }
 
+export function checkAlreadyCancelledInModifying(updateData, foundPickup) {
+  const currentStatus = foundPickup.status;
+  if (currentStatus === "CANCELLED") {
+    const error = new Error("취소된 요청은 수정할 수 없습니다");
+    error.title = "Response (400 Bad Request) : ";
+    error.code = "ALREADY_CANCELLED";
+    error.details = {
+      status: "CANCELLED",
+      cancelledAt: foundPickup.updatedAt,
+    };
+
+    throw error;
+  }
+}

@@ -19,6 +19,7 @@ import {
   checkInvalidField,
   checkRequiredField,
   checkRequestLength,
+  checkAlreadyCancelledInModifying,
 } from "./dbDataCheck.js";
 
 export const createPickup = async (pickupData) => {
@@ -103,7 +104,7 @@ export const cancelPickup = async (id) => {
     checkNonExistentId(dbCancelPickup);
     checkStatusCancellable(dbCancelPickup);
     checkTimeCancellable(dbCancelPickup);
-    checkInvalidRequest(dbCancelPickup);
+    // checkInvalidRequest(dbCancelPickup);
 
     const dbCancelResult = await Pickup.findOneAndUpdate(
       { _id: id },
@@ -118,7 +119,12 @@ export const cancelPickup = async (id) => {
 };
 
 export const updatePickup = async (id, updateData) => {
-  // [PATCH]
+
+  const foundPickup = await Pickup.findById({ _id: id });
+  const currentStatus = foundPickup.status;
+  console.log(foundPickup);
+  console.log("currentStatus : ", currentStatus);
+;;  // [PATCH]
   // 3. 필수 항목 누락 - updateData 가 비어있는지 확인한다
   // 4. 취소된 요청 - status === "CANCELLED"
   // 5. 처리 중인 요청 - status === "PROCESSING"
@@ -130,9 +136,9 @@ export const updatePickup = async (id, updateData) => {
     checkInvalidField(updateData);
     checkRequiredField(updateData);
     checkRequestLength(updateData);
+    checkAlreadyCancelledInModifying(updateData, foundPickup);
 
-    // 0. Success 코드
-    const dbUpdatePickup = await Pickup.findOneAndUpdate( //null
+    const dbUpdatePickup = await Pickup.findOneAndUpdate(
       { _id: id },
       { requestDetails: updateData.requestDetails, status: "UPDATED" },
       { new: true },
