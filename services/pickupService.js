@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 import env from "../config/env.js";
 import dotenv from "dotenv";
 dotenv.config();
-import { startSession } from "mongoose";
 
 import {
   checkFieldMissing,
@@ -148,7 +147,7 @@ export const updatePickup = async (id, updateData) => {
       { new: true }
     );
 
-    // makeTransactionError(); // transaction error 가정
+    // makeTransactionError(); // 🔴 transaction error 가정
     await session.commitTransaction();
 
     return dbUpdatePickup;
@@ -158,7 +157,7 @@ export const updatePickup = async (id, updateData) => {
       throw error;
     }
     await session.abortTransaction();
-    console.log("🟢 Transaction Error");
+    console.log("🔴 Transaction Error");
 
     throw error;
   }

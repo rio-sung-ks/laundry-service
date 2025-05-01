@@ -14,6 +14,7 @@ export function checkNoRecordFound(start, end, dbGetPickups) {
     throw error;
   }
 }
+
 export function checkTimeCancellable(dbCancelPickup) {
   const now = new Date();
   const nowTime = now.getTime();
@@ -38,6 +39,7 @@ export function checkTimeCancellable(dbCancelPickup) {
     throw error;
   }
 }
+
 export function checkStatusCancellable(dbCancelPickup) {
   const isStatusCancellable = dbCancelPickup.status !== "CANCELLED";
   if (!isStatusCancellable) {
@@ -53,6 +55,7 @@ export function checkStatusCancellable(dbCancelPickup) {
     throw error;
   }
 }
+
 export function checkNonExistentId(dbCancelPickup) {
   if (!dbCancelPickup) {
     const error = new Error("해당 수거 요청을 찾을 수 없습니다");
@@ -66,6 +69,7 @@ export function checkNonExistentId(dbCancelPickup) {
     throw error;
   }
 }
+
 export function checkProccessingRequest(dbCancelPickup) {
   if (dbCancelPickup.status === "PROCESSING") {
     const error = new Error("이미 처리 중인 요청입니다");
@@ -81,6 +85,7 @@ export function checkProccessingRequest(dbCancelPickup) {
     throw error;
   }
 }
+
 export function checkInvalidField(updateData) {
 
   const immutableField = ["immutableField1", "immutableField2", "customerName", "immutableField3"] ;
@@ -101,6 +106,7 @@ export function checkInvalidField(updateData) {
     };
 
 }
+
 export function checkRequiredField(updateData) {
 
   const requiredField = ["requestDetails"] ;
@@ -121,6 +127,7 @@ export function checkRequiredField(updateData) {
     };
 
 }
+
 export function checkRequestLength(updateData) {
   const requestLength = updateData.requestDetails.length
   if (requestLength < VALIDATION.REQUEST_DETAILS.MIN_LENGTH ||
@@ -138,6 +145,7 @@ export function checkRequestLength(updateData) {
       throw error;
     }
 }
+
 export function checkIdLength(id) {
   if (id.length !== 24) {
     const error = new Error("잘못된 요청 ID 형식입니다");
@@ -153,6 +161,7 @@ export function checkIdLength(id) {
     throw error;
   }
 }
+
 export function checkAlreadyCancelledInModifying(foundPickup) {
   const currentStatus = foundPickup.status;
   if (currentStatus === "CANCELLED") {
@@ -168,6 +177,7 @@ export function checkAlreadyCancelledInModifying(foundPickup) {
     throw error;
   }
 }
+
 export function checkProccessingInModifying(foundPickup) {
   if (foundPickup.status === "PROCESSING") {
     const error = new Error("처리 중인 요청은 수정할 수 없습니다");
@@ -183,6 +193,7 @@ export function checkProccessingInModifying(foundPickup) {
     throw error;
   }
 }
+
 export function makeTransactionError() {
   const error = new Error("요청 수정 처리 중 오류가 발생했습니다");
   error.status = 500;
