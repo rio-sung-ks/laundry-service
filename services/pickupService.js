@@ -16,6 +16,7 @@ import {
   checkStatusCancellable,
   checkNonExistentId,
   checkProccessingRequest,
+  checkInvalidField,
 } from "./dbDataCheck.js";
 
 export const createPickup = async (pickupData) => {
@@ -124,13 +125,7 @@ export const updatePickup = async (id, updateData) => {
   // 1. 수정 불가능한 필드 포함 -
   // 수정이 불가능한 필드를 배열로 만든다
   try {
-    const immutableField = ["immutableField1", "immutableField2", "customerName", "immutableField3"] ;
-    for (const field in updateData) {
-      if (immutableField.indexOf(field) !== -1) {
-        console.log(immutableField.indexOf(field));
-        throw error;
-      }
-    }
+    checkInvalidField(updateData)
 
     // 0. Success 코드
     const dbUpdatePickup = await Pickup.findOneAndUpdate( //null
@@ -138,7 +133,6 @@ export const updatePickup = async (id, updateData) => {
       { requestDetails: updateData.requestDetails, status: "UPDATED" },
       { new: true },
     );
-
 
     // 2. 필수 항목 길이 - requestDetails => updateData 의 validation 으로 길이를 확인한다
     // console.log(updateData.requestDetails.length());

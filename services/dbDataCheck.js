@@ -80,3 +80,22 @@ export function checkProccessingRequest(dbCancelPickup) {
   }
 }
 
+export function checkInvalidField(updateData) {
+
+  const immutableField = ["immutableField1", "immutableField2", "customerName", "immutableField3"] ;
+    for (const field in updateData) {
+      if (immutableField.indexOf(field) !== -1) {
+        const error = new Error("수정할 수 없는 필드가 포함되어 있습니다");
+        error.status = 409;
+        error.title = "Response (400 Bad Request) : ";
+        error.code = "INVALID_UPDATE_FIELD";
+        error.details = {
+          field: "customerName",
+          constraint: "readonly"
+        };
+
+        throw error;
+      }
+    };
+
+}
