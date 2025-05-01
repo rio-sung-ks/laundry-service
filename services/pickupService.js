@@ -20,6 +20,7 @@ import {
   checkRequiredField,
   checkRequestLength,
   checkAlreadyCancelledInModifying,
+  checkProccessingInModifying,
 } from "./dbDataCheck.js";
 
 export const createPickup = async (pickupData) => {
@@ -136,7 +137,9 @@ export const updatePickup = async (id, updateData) => {
     checkInvalidField(updateData);
     checkRequiredField(updateData);
     checkRequestLength(updateData);
-    checkAlreadyCancelledInModifying(updateData, foundPickup);
+    checkAlreadyCancelledInModifying(foundPickup);
+    checkProccessingInModifying(foundPickup);
+
 
     const dbUpdatePickup = await Pickup.findOneAndUpdate(
       { _id: id },

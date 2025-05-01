@@ -69,7 +69,7 @@ export function checkProccessingRequest(dbCancelPickup) {
   if (dbCancelPickup.status === "PROCESSING") {
     const error = new Error("이미 처리 중인 요청입니다");
     error.status = 409;
-    error.title = "Response (409 Bad Request) : ";
+    error.title = "Response (409 Conflict) : ";
     error.code = "REQUEST_IN_PROCESS";
     error.details = {
       status: "PROCESSING",
@@ -137,7 +137,7 @@ export function checkRequestLength(updateData) {
     }
 }
 
-export function checkAlreadyCancelledInModifying(updateData, foundPickup) {
+export function checkAlreadyCancelledInModifying(foundPickup) {
   const currentStatus = foundPickup.status;
   if (currentStatus === "CANCELLED") {
     const error = new Error("취소된 요청은 수정할 수 없습니다");
@@ -146,6 +146,21 @@ export function checkAlreadyCancelledInModifying(updateData, foundPickup) {
     error.details = {
       status: "CANCELLED",
       cancelledAt: foundPickup.updatedAt,
+    };
+
+    throw error;
+  }
+}
+
+export function checkProccessingInModifying(foundPickup) {
+  if (foundPickup.status === "PROCESSING") {
+    const error = new Error("처리 중인 요청은 수정할 수 없습니다");
+    error.status = 409;
+    error.title = "Response (409 Conflict) : ";
+    error.code = "REQUEST_IN_PROCESS";
+    error.details = {
+      status: "PROCESSING",
+      startedAt: foundPickup.updatedAt,
     };
 
     throw error;
