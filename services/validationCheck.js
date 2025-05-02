@@ -56,6 +56,7 @@ export function checkPhoneNumberFormat(pickupData) {
     throw error;
   }
 }
+
 export function checkDateFormat(startDate, endDate) {
   if (isNaN(startDate.getDate()) || isNaN(endDate.getDate())) {
     const error = new Error(MESSAGES.ERROR.INVALID_DATE);
@@ -69,6 +70,7 @@ export function checkDateFormat(startDate, endDate) {
     throw error;
   }
 }
+
 export function checkDateRange(startDate, endDate) {
   if (startDate > endDate) {
     const error = new Error(MESSAGES.ERROR.INVALID_DATE_RANGE);
@@ -81,6 +83,7 @@ export function checkDateRange(startDate, endDate) {
     throw error;
   }
 }
+
 export function checkPageNumber(pageNumber) {
   if (pageNumber < 1) {
     const error = new Error(MESSAGES.ERROR.INVALID_PAGE);
@@ -94,6 +97,7 @@ export function checkPageNumber(pageNumber) {
     throw error;
   }
 }
+
 export function checkPageLimit(pageLimit) {
   if (pageLimit > 100) {
     const error = new Error(MESSAGES.ERROR.INVALID_LIMIT);
@@ -107,3 +111,43 @@ export function checkPageLimit(pageLimit) {
     throw error;
   }
 }
+const timeLimit = 60 * 60 * 1000;
+export const requestCounts = {};
+export const rateLimiter = (req, res, next) => {
+  const ip = req.ip;
+  const now = Date.now();
+
+  if (!requestCounts[ip]) {
+      requestCounts[ip] = { count: 1, lastRequest: now };
+  } else {
+      const timeSinceLastRequest = now - requestCounts[ip].lastRequest;
+
+      if (timeSinceLastRequest < timeLimit) {
+      requestCounts[ip].count += 1;
+      } else {
+      requestCounts[ip] = { count: 1, lastRequest: now };
+      }
+  }
+
+  const maxRequests = 10;
+
+  if (requestCounts[ip].count > maxRequests) {
+      const error = new Error(
+      "요청 횟수가 초과되었습니다. 잠시 후 다시 시도해주세요"
+      );
+      error.status = 429;
+      error.title = "Response (429 Too Many Requests) : ";
+      error.code = "RATE_LIMIT_EXCEEDED";
+      error.isValid = false;
+      error.details = {
+      retryAfter: timeLimit / (60 * 1000),
+      limit: maxRequests,
+      remaining: 0,
+      };
+      throw error;
+  }
+
+  requestCounts[ip].lastRequest = now;
+  next();
+  };
+

@@ -8,10 +8,16 @@ import env from './config/env.js';
 import dotenv from "dotenv";
 dotenv.config();
 import pickupRoutes from './routes/pickupRoutes.js';
+import { rateLimiter } from './services/validationCheck.js';
 
 const app = express();
 
 app.use(helmet());
+
+const requestCounts = {};
+app.get("/", rateLimiter, (req, res) => {
+  res.send("요청 성공");
+});
 
 /*
 
@@ -20,78 +26,11 @@ app.use(helmet());
  */
 // mongoose.populate 활용
 // https://mongoosejs.com/docs/populate.html
-
 app.use(cors({
   origin: env.CORS_ORIGIN || '*',
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-
-// Store request counts per IP
-const requestCounts = {};
-
-// Custom rate limiter middleware
-const rateLimiter = (req, res, next) => {
-  const ip = req.ip;
-  const now = Date.now();
-
-  if (!requestCounts[ip]) {
-    requestCounts[ip] = { count: 1, lastRequest: now };
-  } else {
-    const timeSinceLastRequest = now - requestCounts[ip].lastRequest;
-    const timeLimit = 60 * 60 * 1000; // 60 minutes
-
-    if (timeSinceLastRequest < timeLimit) {
-      requestCounts[ip].count += 1;
-    } else {
-      requestCounts[ip] = { count: 1, lastRequest: now }; // Reset after time window
-    }
-  }
-
-  const maxRequests = 10;
-
-  if (requestCounts[ip].count > maxRequests) {
-    // error 만들기
-    const error = new Error("요청 횟수가 초과되었습니다. 잠시 후 다시 시도해주세요");
-    error.status = 429;
-    error.title = "Response (429 Too Many Requests) : ";
-    error.code = "RATE_LIMIT_EXCEEDED";
-    error.isValid = false;
-    error.details = {
-        retryAfter: 60,
-        limit: 100,
-        remaining: 0
-    };
-    throw error;
-  }
-
-  requestCounts[ip].lastRequest = now;
-  next();
-};
-
-// Apply the custom rate limiter
-app.use(rateLimiter);
-app.get("/", rateLimiter, (req, res) => {
-  res.send("요청 성공")
-});
-
-
-app.get('/', (req, res) => {
-  res.send('Welcome to the rate-limited server');
-});
-
-app.listen(3000, () => {
-  console.log('Server running on http://localhost:3000');
-});
-
-
-
-
-
-
-
-
-
 
 const conn = mongoose.createConnection(env.MONGODB_URI)
 
