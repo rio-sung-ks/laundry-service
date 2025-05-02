@@ -147,17 +147,14 @@ export const updatePickup = async (id, updateData) => {
       { new: true }
     );
 
-    // makeTransactionError(); // 🔴 transaction error 가정
     await session.commitTransaction();
 
     return dbUpdatePickup;
   } catch (error) {
     if(!error.isValid){
-      console.log("🟢 Validation Error");
       throw error;
     }
     await session.abortTransaction();
-    console.log("🔴 Transaction Error");
 
     throw error;
   }

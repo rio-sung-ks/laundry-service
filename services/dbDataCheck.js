@@ -207,7 +207,3 @@ export function makeTransactionError() {
 
   throw error;
 }
-
-
-
-// }

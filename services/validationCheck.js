@@ -111,9 +111,10 @@ export function checkPageLimit(pageLimit) {
     throw error;
   }
 }
-const timeLimit = 60 * 60 * 1000;
+
 export const requestCounts = {};
 export const rateLimiter = (req, res, next) => {
+  const timeLimit = 10 * 60 * 1000;
   const ip = req.ip;
   const now = Date.now();
 
@@ -150,4 +151,3 @@ export const rateLimiter = (req, res, next) => {
   requestCounts[ip].lastRequest = now;
   next();
   };
-

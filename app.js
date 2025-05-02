@@ -13,8 +13,6 @@ import { rateLimiter } from './services/validationCheck.js';
 const app = express();
 
 app.use(helmet());
-
-const requestCounts = {};
 app.get("/", rateLimiter, (req, res) => {
   res.send("요청 성공");
 });
