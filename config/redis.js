@@ -12,7 +12,7 @@ const redis = new Redis({
 });
 
 redis.on('error', (err) => {
-  // console.error('Redis 연결 오류:', err);
+  console.error('Redis 연결 오류:', err);
 });
 
 redis.on('connect', () => {

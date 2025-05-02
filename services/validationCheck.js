@@ -1,4 +1,5 @@
 import { MESSAGES, TIME, VALIDATION } from "../config/constants.js";
+import env from '../config/env.js';
 
 export function checkFieldMissing(pickupData) {
   const requestField = [
@@ -114,40 +115,63 @@ export function checkPageLimit(pageLimit) {
 
 export const requestCounts = {};
 export const rateLimiter = (req, res, next) => {
-  const timeLimit = 10 * 60 * 1000;
+
+  const timeLimit = env.RATE_LIMIT_WINDOW;
   const ip = req.ip;
   const now = Date.now();
 
   if (!requestCounts[ip]) {
-      requestCounts[ip] = { count: 1, lastRequest: now };
+    requestCounts[ip] = { count: 1, lastRequest: now };
   } else {
-      const timeSinceLastRequest = now - requestCounts[ip].lastRequest;
+    const timeSinceLastRequest = now - requestCounts[ip].lastRequest;
 
-      if (timeSinceLastRequest < timeLimit) {
+    if (timeSinceLastRequest < timeLimit) {
       requestCounts[ip].count += 1;
-      } else {
+    } else {
       requestCounts[ip] = { count: 1, lastRequest: now };
-      }
+    }
   }
 
-  const maxRequests = 10;
+  const maxRequests = env.RATE_LIMIT_MAX;
 
   if (requestCounts[ip].count > maxRequests) {
-      const error = new Error(
+    const error = new Error(
       "요청 횟수가 초과되었습니다. 잠시 후 다시 시도해주세요"
-      );
-      error.status = 429;
-      error.title = "Response (429 Too Many Requests) : ";
-      error.code = "RATE_LIMIT_EXCEEDED";
-      error.isValid = false;
-      error.details = {
+    );
+    error.status = 429;
+    error.title = "Response (429 Too Many Requests) : ";
+    error.code = "RATE_LIMIT_EXCEEDED";
+    error.isValid = false;
+    error.details = {
       retryAfter: timeLimit / (60 * 1000),
       limit: maxRequests,
       remaining: 0,
-      };
-      throw error;
+    };
+    throw error;
   }
 
   requestCounts[ip].lastRequest = now;
   next();
-  };
+};
+
+
+// rateLimiter 의사코드
+
+// 시간과 횟수 리밋을 선언한다
+// 현재 시간을 기록한다
+// 접속 정보를 기록할 객체를 만든다
+
+// ip와 지금 시간을 객체에 저장한다
+
+// 요청이 왔을 때
+// 저장된 ip 가 있으면)
+    // 시간과 저장된 시간의 차이를 구한다
+
+    // 차이 < 시간 리밋, count ++
+            // 시간 리밋 보다 작은데 count ++ 가 제한 횟수 보다 큰 경우 => 429
+            // 시간 리밋 보다 작은데 count ++ 가 제한 횟수 보다 작은 경우 => 접속
+
+    // 차이 > 시간 리밋, count reset
+
+// 저장된 ip 가 없으면)
+    // 저장 후 위 과정으로 이동

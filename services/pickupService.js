@@ -28,6 +28,10 @@ import {
   makeTransactionError,
   checkIdLength,
 } from "./dbDataCheck.js";
+import redis from "../config/redis.js";
+import Redis from "ioredis";
+import { makeRedisError } from "./makeRedisError.js";
+
 
 export const createPickup = async (pickupData) => {
   const requestField = [
@@ -41,9 +45,6 @@ export const createPickup = async (pickupData) => {
   checkFieldMissing(pickupData);
   checkNameLength(pickupData);
   checkPhoneNumberFormat(pickupData);
-  // 4. exceed the number of request
-  // Redis
-  // Response (429 Too Many Requests):
 
   try {
     await mongoose.connect(env.MONGODB_URI);
@@ -74,24 +75,27 @@ export const createPickup = async (pickupData) => {
 
 export const getPickups = async (query) => {
   const { start, end, page, limit, status } = query;
-  const startDate = new Date(start); // invalid Date 가 결과로 담김.
+  const startDate = new Date(start);
   const endDate = new Date(end);
+  const filter = {createdAt: { $gte: startDate, $lte: endDate }};
 
+  checkDateFormat(startDate, endDate);
+  checkDateRange(startDate, endDate);
+  checkPageNumber(page);
+  checkPageLimit(limit);
+  redis.disconnect();
+  const cacheKey = `getPikcups:${start}_${end}`;
   try {
-    checkDateFormat(startDate, endDate);
-    checkDateRange(startDate, endDate);
-    checkPageNumber(page);
-    checkPageLimit(limit);
+    const cachedData = await redis.get(cacheKey);
+    if (cachedData) {
+      const result = JSON.parse(cachedData);
+      return result;
+    }
 
     await mongoose.connect(env.MONGODB_URI);
-    const dbGetPickups = await Pickup.find({
-      createdAt: { $gte: startDate, $lte: endDate },
-    });
-    const docsTotal = await Pickup.countDocuments({
-      createdAt: { $gte: startDate, $lte: endDate },
-    });
+    const dbGetPickups = await Pickup.find(filter);
+    const docsTotal = await Pickup.countDocuments(filter);
 
-    // 5. internal server error
     checkNoRecordFound(start, end, dbGetPickups);
     const pagination = {
       total: docsTotal,
@@ -100,9 +104,11 @@ export const getPickups = async (query) => {
       totalPages: Math.ceil(docsTotal / limit),
     };
 
+    await redis.set(cacheKey, JSON.stringify({ dbGetPickups, pagination }), 'EX', 300);
+
     return { dbGetPickups, pagination };
-  } catch (error) {
-    throw error;
+  } catch (redisError) {
+    makeRedisError();
   }
 };
 
@@ -122,7 +128,6 @@ export const cancelPickup = async (id) => {
 
     return dbCancelResult;
   } catch (error) {
-    console.log("error catch");
     throw error;
   }
 };
@@ -151,14 +156,13 @@ export const updatePickup = async (id, updateData) => {
 
     return dbUpdatePickup;
   } catch (error) {
-    if(!error.isValid){
+    if (!error.isValid) {
       throw error;
     }
     await session.abortTransaction();
 
     throw error;
-  }
-  finally {
+  } finally {
     session.endSession();
   }
 };
