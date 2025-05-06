@@ -111,30 +111,44 @@ export function checkInvalidField(updateData) {
 }
 
 export function checkRequiredField(updateData) {
-  const requiredField = ["requestDetails"];
-  for (const field in updateData) {
-    if (requiredField.indexOf(field) === -1) {
-      const error = new Error("요청사항 필드는 필수입니다.");
-      error.status = 400;
-      error.title = "Response (400 Bad Request) : ";
-      error.code = "MISSING_REQUEST_DETAILS";
-      error.isValid = false;
-      error.details = {
-        field: "requestDetails",
-        constraint: "required",
-      };
+  console.log("updateData :",updateData);
 
-      throw error;
-    }
+  if(Object.keys(updateData).length === 0){
+    const error = new Error("요청사항 필드는 필수입니다.");
+    error.status = 400;
+    error.title = "Response (400 Bad Request) : ";
+    error.code = "MISSING_REQUEST_DETAILS";
+    error.isValid = false;
+    error.details = {
+      field: "requestDetails",
+      constraint: "required",
+    };
+    throw error;
+  }
+
+  console.log("body fields :",Object.keys(updateData));
+
+  if ((Object.keys(updateData)).indexOf("requestDetails") === -1) {
+    const error = new Error("요청사항 필드는 필수입니다.");
+    error.status = 400;
+    error.title = "Response (400 Bad Request) : ";
+    error.code = "MISSING_REQUEST_DETAILS";
+    error.isValid = false;
+    error.details = {
+      field: "requestDetails",
+      constraint: "required",
+    };
+    throw error;
   }
 }
 
 export function checkRequestLength(updateData) {
-  const requestLength = updateData.requestDetails.length;
+  const requestLength = updateData?.requestDetails?.length;
   if (
     requestLength < VALIDATION.REQUEST_DETAILS.MIN_LENGTH ||
     requestLength > VALIDATION.REQUEST_DETAILS.MAX_LENGTH
   ) {
+    console.log("here2");
     const error = new Error("요청사항은 10-1000자 사이여야 합니다.");
     error.status = 400;
     error.title = "Response (400 Bad Request) : ";

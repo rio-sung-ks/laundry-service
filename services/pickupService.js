@@ -83,7 +83,7 @@ export const getPickups = async (query) => {
   checkDateRange(startDate, endDate);
   checkPageNumber(page);
   checkPageLimit(limit);
-  redis.disconnect();
+  // redis.disconnect();
   const cacheKey = `getPikcups:${start}_${end}`;
   try {
     const cachedData = await redis.get(cacheKey);
