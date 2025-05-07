@@ -1,43 +1,53 @@
 class AppError extends Error {
-  constructor(message, status) {
+  constructor(message, status, code, details, isValid = false) {
     super(message);
     this.status = status;
+    this.code = code;
+    this.details = details;
+    this.isValid = isValid;
+    Error.captureStackTrace?.(this, this.constructor);
   }
 }
 
-class InvalidError extends AppError {
-  constructor(message, code, details) {
-    super(message, 400);
-    this.code = code;
-    this.isValid = false;
-    this.details = details;
+class BusinessError extends AppError {
+  constructor(message, status, code, details, isValid = false) {
+    super(message, status, code, details, isValid);
   }
 }
 
-class ConflictError extends AppError {
-  constructor(message, code, details) {
-    super(message, 409);
-    this.code = code;
-    this.isValid = false;
-    this.details = details;
+class HttpError extends AppError {
+  constructor(message, status, code, details, isValid = false) {
+    super(message, status, code, details, isValid);
   }
 }
 
-class TransactionError extends AppError {
+class InvalidBusinessError extends BusinessError {
   constructor(message, code, details) {
-    super(message, 500);
-    this.code = code;
-    this.isValid = true;
-    this.details = details;
+    super(message, 400, code, details, false);
   }
 }
 
-class RateLimitError extends AppError {
+class InvalidError extends HttpError {
   constructor(message, code, details) {
-    super(message, 429);
-    this.code = code;
-    this.isValid = true;
-    this.details = details;
+    super(message, 400, code, details, false);
+  }
+}
+
+class ConflictError extends HttpError {
+  constructor(message, code, details) {
+    super(message, 409, code, details, false);
+  }
+}
+
+class TransactionError extends HttpError {
+  constructor(message, code, details) {
+    super(message, 500, code, details, true);
+  }
+}
+
+class RateLimitError extends HttpError {
+  constructor(message, code, details) {
+    super(message, 429, code, details, true);
   }
 }
 
@@ -47,4 +57,6 @@ export {
   ConflictError,
   TransactionError,
   RateLimitError,
+  BusinessError,
+  InvalidBusinessError,
 };
