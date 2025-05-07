@@ -32,9 +32,19 @@ class TransactionError extends AppError {
   }
 }
 
+class RateLimitError extends AppError {
+  constructor(message, code, details) {
+    super(message, 429);
+    this.code = code;
+    this.isValid = true;
+    this.details = details;
+  }
+}
+
 export {
   AppError,
   InvalidError,
   ConflictError,
   TransactionError,
+  RateLimitError,
 };
