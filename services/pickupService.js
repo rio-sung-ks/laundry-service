@@ -83,11 +83,11 @@ export const getPickups = async (query) => {
   checkDateRange(startDate, endDate);
   checkPageNumber(page);
   checkPageLimit(limit);
-  // redis.disconnect();
   const cacheKey = `getPikcups:${start}_${end}`;
   try {
     const cachedData = await redis.get(cacheKey);
     if (cachedData) {
+      // redis.disconnect();
       const result = JSON.parse(cachedData);
       return result;
     }
@@ -107,9 +107,16 @@ export const getPickups = async (query) => {
     await redis.set(cacheKey, JSON.stringify({ dbGetPickups, pagination }), 'EX', 300);
 
     return { dbGetPickups, pagination };
-  } catch (redisError) {
+  } catch (error) {
+    if (!error.isValid) {
+      throw error;
+    }
+    console.log(">>>>>");
     makeRedisError();
+    throw error;
   }
+
+
 };
 
 export const cancelPickup = async (id) => {

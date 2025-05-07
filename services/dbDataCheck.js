@@ -1,17 +1,16 @@
-import { TIME, VALIDATION } from "../config/constants.js";
+import { CODE, MESSAGES, TIME, VALIDATION } from "../config/constants.js";
+import { InvalidError } from "../Util/error.js";
 
 export function checkNoRecordFound(start, end, dbGetPickups) {
   if (dbGetPickups.length === 0) {
-    const error = new Error("해당 기간의 수거 요청이 존재하지 않습니다.");
-    error.title = "Response (404 Not Found): ";
-    error.code = "NO_RECORDS_FOUND";
-    error.isValid = false;
-    error.details = {
-      start: start,
-      end: end,
-    };
-
-    throw error;
+    throw new InvalidError(
+      MESSAGES.ERROR.NO_RECORDS_FOUND,
+      CODE.NO_RECORDS_FOUND,
+      {
+        start: start,
+        end: end,
+      }
+    );
   }
 }
 
@@ -26,47 +25,41 @@ export function checkTimeCancellable(dbCancelPickup) {
   const isCancellable = timeElapsed <= TIME.CANCELLATION_WINDOW;
 
   if (!isCancellable) {
-    const error = new Error("취소 가능 시간(1시간)이 경과했습니다");
-    error.title = "Response (400 Bad Request) : ";
-    error.code = "CANCELLATION_TIME_EXPIRED";
-    error.isValid = false;
-    error.details = {
-      createdAt: dbCancelPickup.createdAt,
-      curretTime: new Date(nowTime),
-      timeElapsed: `${hourElapsedFloor} 시간 ${minElapsedFloor} 분`,
-    };
-
-    throw error;
+    throw new InvalidError(
+      MESSAGES.ERROR.CANCELLATION_TIME_EXPIRED,
+      CODE.CANCELLATION_TIME_EXPIRED,
+      {
+        createdAt: dbCancelPickup.createdAt,
+        curretTime: new Date(nowTime),
+        timeElapsed: `${hourElapsedFloor} 시간 ${minElapsedFloor} 분`,
+      }
+    );
   }
 }
 
 export function checkStatusCancellable(dbCancelPickup) {
   const isStatusCancellable = dbCancelPickup.status !== "CANCELLED";
   if (!isStatusCancellable) {
-    const error = new Error("이미 취소된 요청입니다");
-    error.title = "Response (400 Bad Request) : ";
-    error.code = "ALREADY_CANCELLED";
-    error.isValid = false;
-    error.details = {
-      status: dbCancelPickup.status,
-      cancelledAt: dbCancelPickup.updatedAt,
-    };
-
-    throw error;
+    throw new InvalidError(
+      MESSAGES.ERROR.ALREADY_CANCELLED,
+      CODE.ALREADY_CANCELLED,
+      {
+        status: dbCancelPickup.status,
+        cancelledAt: dbCancelPickup.updatedAt,
+      }
+    );
   }
 }
 
 export function checkNonExistentId(dbCancelPickup) {
   if (!dbCancelPickup) {
-    const error = new Error("해당 수거 요청을 찾을 수 없습니다");
-    error.title = "Response (400 Bad Request) : ";
-    error.code = "PICKUP_NOT_FOUND";
-    error.isValid = false;
-    error.details = {
-      requestId: "nonexistent_id",
-    };
-
-    throw error;
+    throw new InvalidError(
+      MESSAGES.ERROR.PICKUP_NOT_FOUND,
+      CODE.PICKUP_NOT_FOUND,
+      {
+        requestId: "nonexistent_id",
+      }
+    )
   }
 }
 
@@ -75,6 +68,7 @@ export function checkProccessingRequest(dbCancelPickup) {
     const error = new Error("이미 처리 중인 요청입니다");
     error.status = 409;
     error.title = "Response (409 Conflict) : ";
+
     error.code = "REQUEST_IN_PROCESS";
     error.isValid = false;
     error.details = {
@@ -111,9 +105,7 @@ export function checkInvalidField(updateData) {
 }
 
 export function checkRequiredField(updateData) {
-  console.log("updateData :",updateData);
-
-  if(Object.keys(updateData).length === 0){
+  if (Object.keys(updateData).length === 0) {
     const error = new Error("요청사항 필드는 필수입니다.");
     error.status = 400;
     error.title = "Response (400 Bad Request) : ";
@@ -126,9 +118,7 @@ export function checkRequiredField(updateData) {
     throw error;
   }
 
-  console.log("body fields :",Object.keys(updateData));
-
-  if ((Object.keys(updateData)).indexOf("requestDetails") === -1) {
+  if (Object.keys(updateData).indexOf("requestDetails") === -1) {
     const error = new Error("요청사항 필드는 필수입니다.");
     error.status = 400;
     error.title = "Response (400 Bad Request) : ";
@@ -165,17 +155,11 @@ export function checkRequestLength(updateData) {
 
 export function checkIdLength(id) {
   if (id.length !== 24) {
-    const error = new Error("잘못된 요청 ID 형식입니다");
-    error.title = "Response (400 Bad Request) : ";
-    error.code = "INVALID_REQUEST_ID";
-    error.isValid = false;
-    error.details = {
+    throw new InvalidError("테스트 메세지", "INVALID_REQUEST_ID", {
       field: "id",
       value: "invalid-id-format",
       constraint: "24자리 16진수 문자열",
-    };
-
-    throw error;
+    });
   }
 }
 
