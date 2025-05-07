@@ -1,14 +1,8 @@
-import { MESSAGES, TIME, VALIDATION } from "../config/constants.js";
+import { MESSAGES, requiredField, TIME, VALIDATION } from "../config/constants.js";
 import env from '../config/env.js';
 
 export function checkFieldMissing(pickupData) {
-  const requestField = [
-    "customerName",
-    "address",
-    "phoneNumber",
-    "requestDetails",
-  ];
-  for (const field of requestField) {
+  for (const field of requiredField) {
     if (!pickupData[field]) {
       const error = new Error("필수 필드가 누락되었습니다");
       error.title = "Response (400 Bad Request): ";

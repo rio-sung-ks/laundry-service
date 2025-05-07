@@ -34,12 +34,7 @@ import { makeRedisError } from "./makeRedisError.js";
 
 
 export const createPickup = async (pickupData) => {
-  const requestField = [
-    "customerName",
-    "address",
-    "phoneNumber",
-    "requestDetails",
-  ];
+
   const customerName = pickupData["customerName"];
 
   checkFieldMissing(pickupData);

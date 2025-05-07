@@ -93,7 +93,7 @@ export const MESSAGES = {
     PICKUP_NOT_FOUND: "해당 수거 요청을 찾을 수 없습니다.",
     REQUEST_IN_PROCESS: "이미 처리 중인 요청입니다.",
     INVALID_UPDATE_FIELD: "수정할 수 없는 필드가 포함되어 있습니다.",
-    MISSING_REQUEST_DETAILS: "요청사항 필드는 필수입니다.",
+    MISSING_REQUEST_DETAILS2: "요청사항 필드는 필수입니다.",
     INVALID_REQUEST_LENGTH: "요청사항은 10-1000자 사이여야 합니다.",
     REQUEST_IN_PROCESS_NOTCANCELLABLE: "처리 중인 요청은 수정할 수 없습니다.",
     TRANSACTION_ERROR: "요청 수정 처리 중 오류가 발생했습니다.",
@@ -116,7 +116,7 @@ export const CODE = {
     PICKUP_NOT_FOUND: "PICKUP_NOT_FOUND",
     REQUEST_IN_PROCESS: "REQUEST_IN_PROCESS",
     INVALID_UPDATE_FIELD: "INVALID_UPDATE_FIELD",
-    MISSING_REQUEST_DETAILS: "MISSING_REQUEST_DETAILS",
+    MISSING_REQUEST_DETAILS2: "MISSING_REQUEST_DETAILS",
     INVALID_REQUEST_LENGTH: "INVALID_REQUEST_LENGTH",
     REQUEST_IN_PROCESS_NOTCANCELLABLE: "REQUEST_IN_PROCESS_NOTCANCELLABLE",
     TRANSACTION_ERROR: "TRANSACTION_ERROR",
@@ -147,3 +147,14 @@ export const LOG_MESSAGES = {
     CACHE_ERROR: '캐시 처리 중 오류 발생'
   }
 };
+
+export const requiredField = [
+    "customerName",
+    "address",
+    "phoneNumber",
+    "requestDetails",
+  ];
+
+export const immutableField = [
+  "customerName",
+];
