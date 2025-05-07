@@ -98,15 +98,13 @@ export function checkRequiredField(updateData, requiredField) {
   let count = 0;
   let missingRequiredFields = [];
   for (const field of requiredField) {
-    if(updateFields.includes(field)){ // 모든 required 필드가 있는지 확인
+    if (updateFields.includes(field)) { // 모든 required 필드가 있는지 확인
       count ++;
     } else {
       missingRequiredFields.push(field);
     }
   }
   const hasFields = count === requiredField.length;
-  console.log(hasFields);
-
   if (!hasFields) {
     throw new InvalidError(
       MESSAGES.ERROR.MISSING_REQUEST_DETAILS2,
