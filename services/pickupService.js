@@ -31,6 +31,7 @@ import {
 import redis from "../config/redis.js";
 import Redis from "ioredis";
 import { makeRedisError } from "./makeRedisError.js";
+import { immutableField, requiredField } from "../config/constants.js";
 
 
 export const createPickup = async (pickupData) => {
@@ -142,8 +143,8 @@ export const updatePickup = async (id, updateData) => {
     session.startTransaction();
     checkIdLength(id);
     const foundPickup = await Pickup.findById({ _id: id });
-    checkInvalidField(updateData);
-    checkRequiredField(updateData);
+    checkInvalidField(updateData, immutableField);
+    checkRequiredField(updateData, requiredField);
     checkRequestLength(updateData);
     checkAlreadyCancelledInModifying(foundPickup);
     checkProccessingInModifying(foundPickup);

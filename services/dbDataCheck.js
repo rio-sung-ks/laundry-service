@@ -77,7 +77,7 @@ export function checkProccessingRequest(dbCancelPickup) {
   }
 }
 
-export function checkInvalidField(updateData) {
+export function checkInvalidField(updateData, immutableField) {
 
   for (const field in updateData) {
     if (immutableField.indexOf(field) !== -1) {
@@ -93,24 +93,26 @@ export function checkInvalidField(updateData) {
   }
 }
 
-export function checkRequiredField(updateData) {
-  if (Object.keys(updateData).length === 0) {
-    throw new InvalidError(
-      MESSAGES.ERROR.MISSING_REQUEST_DETAILS2,
-      CODE.MISSING_REQUEST_DETAILS2,
-      {
-        field: "requestDetails",
-        constraint: "required",
-      }
-    )
+export function checkRequiredField(updateData, requiredField) {
+  const updateFields = Object.keys(updateData);
+  let count = 0;
+  let missingRequiredFields = [];
+  for (const field of requiredField) {
+    if(updateFields.includes(field)){ // 모든 required 필드가 있는지 확인
+      count ++;
+    } else {
+      missingRequiredFields.push(field);
+    }
   }
+  const hasFields = count === requiredField.length;
+  console.log(hasFields);
 
-  if (Object.keys(updateData).indexOf("requestDetails") === -1) {
+  if (!hasFields) {
     throw new InvalidError(
       MESSAGES.ERROR.MISSING_REQUEST_DETAILS2,
       CODE.MISSING_REQUEST_DETAILS2,
       {
-        field: "requestDetails",
+        field: missingRequiredFields,
         constraint: "required",
       }
     )

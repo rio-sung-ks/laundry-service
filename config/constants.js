@@ -155,10 +155,8 @@ export const LOG_MESSAGES = {
 };
 
 export const requiredField = [
-    "customerName",
-    "address",
-    "phoneNumber",
     "requestDetails",
+    "address",
   ];
 
 export const immutableField = [
