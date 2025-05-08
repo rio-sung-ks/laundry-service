@@ -9,12 +9,47 @@ import dotenv from "dotenv";
 dotenv.config();
 import pickupRoutes from './routes/pickupRoutes.js';
 import { rateLimiter } from './services/validationCheck.js';
+import redis from './config/redis.js';
+import Pickup from './models/Pickup.js';
 
 const app = express();
 
 app.use(helmet());
 app.get("/", rateLimiter, (req, res) => {
   res.send("요청 성공");
+});
+app.use((req, res, next) => {
+  res.on('finish', () => {
+    console.log(`[${res.statusCode}] ${req.method} ${req.originalUrl}`);
+  });
+  next();
+});
+
+app.get('/test-cached', async (req, res, next) => {
+  const cacheKey = 'pickup:all';
+  try {
+    const cached = await redis.get(cacheKey);
+    if (cached) {
+      return res.status(200).json({ source: 'cache', data: JSON.parse(cached) });
+    }
+
+    const pickups = await Pickup.find();
+    await redis.set(cacheKey, JSON.stringify(pickups), 'EX', 300);
+    return res.status(200).json({ source: 'db', data: pickups });  // ✅ 반드시 return
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ✅ 캐시 없는 라우터
+app.get('/test-nocache', async (req, res, next) => {
+  try {
+    const pickups = await Pickup.find();
+    res.status(200).json({ source: 'db', data: pickups });
+  } catch (err) {
+    next(err);
+  }
 });
 
 /*
