@@ -35,14 +35,14 @@ app.get('/test-cached', async (req, res, next) => {
 
     const pickups = await Pickup.find();
     await redis.set(cacheKey, JSON.stringify(pickups), 'EX', 300);
-    return res.status(200).json({ source: 'db', data: pickups });  // ✅ 반드시 return
+    return res.status(200).json({ source: 'db', data: pickups });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// ✅ 캐시 없는 라우터
+
 app.get('/test-nocache', async (req, res, next) => {
   try {
     const pickups = await Pickup.find();
