@@ -155,6 +155,8 @@ export const LOG_MESSAGES = {
 };
 
 export const requiredField = [
+    "customerName",
+    "phoneNumber",
     "requestDetails",
     "address",
   ];

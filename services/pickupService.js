@@ -107,12 +107,9 @@ export const getPickups = async (query) => {
     if (!error.isValid) {
       throw error;
     }
-    console.log(">>>>>");
     makeRedisError();
     throw error;
   }
-
-
 };
 
 export const cancelPickup = async (id) => {

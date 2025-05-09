@@ -1,4 +1,4 @@
 {
     "postman.settings.dotenv-detection-notification-visibility": false,
-    "mochaExplorer.files": "test/**/*.spec.js"
+    "mochaExplorer.files": "test/spec.js"
 }
