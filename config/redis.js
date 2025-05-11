@@ -1,22 +1,33 @@
 import Redis from 'ioredis';
-import env from './env.js';
+import env   from './env.js';
 
-const redis = new Redis({
-  host: env.REDIS_HOST,
-  port: env.REDIS_PORT,
-  password: env.REDIS_PASSWORD,
-  retryStrategy: (times) => {
-    const delay = Math.min(times * 50, 2000);
-    return delay;
-  }
-});
+let redisClient;
 
-redis.on('error', (err) => {
-  console.error('Redis 연결 오류:', err);
-});
+if (env.REDIS_HOST) {
+  redisClient = new Redis({
+    host:     env.REDIS_HOST,
+    port:     env.REDIS_PORT,
+    password: env.REDIS_PASSWORD,
+    retryStrategy: (times) => {
+      const delay = Math.min(times * 50, 2000);
+      return delay;
+    }
+  });
 
-redis.on('connect', () => {
-  console.log('Redis 연결 성공');
-});
+  redisClient.on('error', (err) => {
+    console.error('Redis 연결 오류:', err);
+  });
+  redisClient.on('connect', () => {
+    console.log('Redis 연결 성공');
+  });
 
-export default redis;
+} else {
+  redisClient = {
+    get:  async (/* key */)       => null,
+    set:  async (/* key,val */)   => {},
+    del:  async (/* key */)       => {},
+    expire: async (/* key,sec */) => {},
+  };
+}
+
+export default redisClient;
